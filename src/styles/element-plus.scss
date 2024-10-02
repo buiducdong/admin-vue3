@@ -1,0 +1,15 @@
+.el-card {
+  background-color: var(--el-bg-color);
+}
+
+.el-pagination {
+  @media screen and (max-width: 768px) {
+    .el-pagination__total,
+    .el-pagination__sizes,
+    .el-pagination__jump,
+    .btn-prev,
+    .btn-next {
+      display: none !important;
+    }
+  }
+}
