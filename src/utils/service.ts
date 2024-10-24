@@ -2,13 +2,28 @@ import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { useUserStoreHook } from "@/store/modules/user";
 import { ElMessage } from "element-plus";
 import { get, merge } from "lodash-es";
-import { getToken } from "./cache/cookies";
+import { getRefreshToken, getToken, setToken } from "./cache/cookies";
 
 /** Log out and force refresh the page (will redirect to the login page) */
 function logout() {
   useUserStoreHook().logout();
   location.reload();
 }
+/** get Refresh Token */
+const getRefreshTokenApi = async () => {
+  const refreshToken = getRefreshToken();
+  const response = await axios.post(
+    `${process.env.VUE_APP_BASE_API}user/refresh-token`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+    }
+  );
+  const newToken = response.data.acessToken;
+  setToken(newToken);
+};
 
 /** Create a request instance */
 function createService() {
@@ -22,70 +37,44 @@ function createService() {
   );
   // Response interception (can be adjusted according to specific business)
   service.interceptors.response.use(
-    (response) => {
-      // apiData is the data returned by the api
-      const apiData = response.data;
-      // Binary data is returned directly
-      const responseType = response.request?.responseType;
-      if (responseType === "blob" || responseType === "arraybuffer")
-        return apiData;
-      // This code is the business code agreed with the backend
-      const code = apiData.code;
-      // If there is no code, it means this is not the API developed by the project backend
-      if (code === undefined) {
-        ElMessage.error("Interfaces other than this system");
-        return Promise.reject(new Error("Interfaces other than this system"));
-      }
-      switch (code) {
-        case 0:
-          // This system uses code === 0 to indicate no business errors.
-          return apiData;
-        case 401:
-          // When the token expires
-          return logout();
-        default:
-          // Not the correct code
-          ElMessage.error(apiData.message || "Error");
-          return Promise.reject(new Error("Error"));
-      }
-    },
+    (response) => response,
     (error) => {
       // status is the HTTP status code
       const status = get(error, "response.status");
       switch (status) {
         case 400:
-          error.message = "请求错误";
+          if (error.response?.data?.errors?.message) {
+            error.message = error.response?.data?.errors?.message;
+          } else {
+            error.message = "Request Error";
+          }
           break;
         case 401:
           // When the token expires
-          logout();
+          try {
+            getRefreshTokenApi();
+            const config = error.config;
+            config.headers.Authorization = `Bearer ${getToken()}`;
+            useUserStoreHook().token = getToken() || "";
+            return service(config);
+          } catch (error) {
+            logout();
+          }
           break;
         case 403:
-          error.message = "拒绝访问";
+          error.message = "Access denied";
           break;
         case 404:
-          error.message = "请求地址出错";
+          error.message = "Request address error";
           break;
         case 408:
-          error.message = "请求超时";
+          error.message = "Request timeout";
           break;
         case 500:
-          error.message = "服务器内部错误";
-          break;
-        case 501:
-          error.message = "服务未实现";
-          break;
-        case 502:
-          error.message = "网关错误";
-          break;
-        case 503:
-          error.message = "服务不可用";
+          error.message = "Internal server error";
           break;
         case 504:
-          error.message = "网关超时";
-          break;
-        case 505:
-          error.message = "HTTP 版本不受支持";
+          error.message = "Gateway timeout";
           break;
         default:
           break;
@@ -108,7 +97,7 @@ function createRequest(service: AxiosInstance) {
         "Content-Type": "application/json",
       },
       timeout: 5000,
-      baseURL: "api",
+      baseURL: process.env.VUE_APP_BASE_API,
       data: {},
     };
     // Merge the default configuration defaultConfig and the passed custom configuration config into mergeConfig

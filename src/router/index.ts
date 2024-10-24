@@ -22,30 +22,30 @@ export const constantRoutes: RouteRecordRaw[] = [
     ],
   },
   {
-    path: "/table",
+    path: "/report",
     component: Layouts,
-    redirect: "/table/element-plus",
-    name: "Table",
+    redirect: "/report/application",
+    name: "Report",
     meta: {
-      title: "Grid",
+      title: "Reports",
       elIcon: "guide",
     },
     children: [
       {
-        path: "element-plus",
-        component: () => import("@/views/dashboard/index.vue"),
-        name: "ElementPlus",
+        path: "application",
+        component: () => import("@/views/table/element-plus/index.vue"),
+        name: "Application",
         meta: {
-          title: "Element Plus",
+          title: "Application",
           keepAlive: true,
         },
       },
       {
-        path: "vxe-table",
+        path: "productivity",
         component: () => import("@/views/dashboard/index.vue"),
-        name: "VxeTable",
+        name: "Productivity",
         meta: {
-          title: "Vxe Table",
+          title: "Productivity",
           keepAlive: true,
         },
       },
@@ -116,12 +116,12 @@ export const dynamicRoutes: RouteRecordRaw[] = [
     meta: {
       title: "Permission",
       svgIcon: "lock",
-      roles: ["admin", "editor"],
+      roles: ["admin", "user"],
       alwaysShow: true,
     },
     children: [
       {
-        path: "page",
+        path: "page-permission",
         component: () => import("@/views/dashboard/index.vue"),
         name: "PagePermission",
         meta: {
@@ -130,7 +130,7 @@ export const dynamicRoutes: RouteRecordRaw[] = [
         },
       },
       {
-        path: "directive",
+        path: "directive-permission",
         component: () => import("@/views/dashboard/index.vue"),
         name: "DirectivePermission",
         meta: {
@@ -145,39 +145,6 @@ const router = createRouter({
   history: createWebHistory("/"),
   routes: constantRoutes,
 });
-
-// router.beforeEach((to, from, next) => {
-//   const isLoggedIn = true; //store.getters["auth/isAuthenticated"];
-//   const userRole = "admin"; //store.getters["auth/getUserRole"];
-
-//   if (isLoggedIn && to.path === "/login") {
-//     if (userRole === "admin") {
-//       next("/admin-dashboard");
-//     } else if (userRole === "user") {
-//       next("/dashboard");
-//     } else {
-//       next("/home");
-//     }
-//   }
-
-//   if (to.matched.some((record) => record.meta.requiresAuth)) {
-//     if (!isLoggedIn) {
-//       next("/login");
-//     } else if (to.matched.some((record) => record.meta.role)) {
-//       const requiredRole = to.meta.role;
-
-//       if (requiredRole === userRole) {
-//         next();
-//       } else {
-//         next("/home");
-//       }
-//     } else {
-//       next();
-//     }
-//   } else {
-//     next();
-//   }
-// });
 
 /** Reset Router */
 export function resetRouter() {

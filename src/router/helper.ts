@@ -9,10 +9,10 @@ import {
 import { cloneDeep, omit } from "lodash-es";
 
 /** Routing Mode */
-export const history = createWebHashHistory("/");
-// import.meta.env.VITE_ROUTER_HISTORY === "hash"
-//   ? createWebHashHistory("/")
-//   : createWebHistory("/");
+export const history =
+  process.env.VUE_APP_ROUTER_HISTORY === "hash"
+    ? createWebHashHistory(process.env.VUE_APP_PUBLIC_PATH)
+    : createWebHistory(process.env.VUE_APP_PUBLIC_PATH);
 
 /** Route downgrade (convert level 3 or higher routes to level 2 routes) */
 export const flatMultiLevelRoutes = (routes: RouteRecordRaw[]) => {

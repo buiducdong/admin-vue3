@@ -1,4 +1,3 @@
-<!-- eslint-disable vue/multi-word-component-names -->
 <script lang="ts" setup>
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
@@ -8,6 +7,7 @@ import { User, Lock } from "@element-plus/icons-vue";
 import { type LoginRequestData } from "@/api/login/types/login";
 import Owl from "./components/Owl.vue";
 import { useFocus } from "./hooks/useFocus";
+import { AxiosError } from "axios";
 
 const router = useRouter();
 const { isFocus, handleBlur, handleFocus } = useFocus();
@@ -19,21 +19,33 @@ const loginFormRef = ref<FormInstance | null>(null);
 const loading = ref(false);
 /** Login form data */
 const loginFormData: LoginRequestData = reactive({
-  username: "admin",
-  password: "admin123",
+  email: "dongbd@vi-mash.com",
+  password: "Abcd@1234",
 });
 /** Login form validation rules */
 const loginFormRules: FormRules = {
-  username: [
-    { required: true, message: "Please enter your username", trigger: "blur" },
+  email: [
+    {
+      required: true,
+      message: "Please enter your email",
+      trigger: ["blur", "change"],
+    },
+    {
+      type: "email",
+      trigger: ["blur", "change"],
+    },
   ],
   password: [
-    { required: true, message: "Please enter your password", trigger: "blur" },
+    {
+      required: true,
+      message: "Please enter your password",
+      trigger: ["blur", "change"],
+    },
     {
       min: 8,
       max: 16,
       message: "Length between 8 and 16 characters",
-      trigger: "blur",
+      trigger: ["blur", "change"],
     },
   ],
 };
@@ -47,7 +59,9 @@ const handleLogin = () => {
         .then(() => {
           router.push({ path: "/" });
         })
-        .catch(() => {
+        .catch((error: AxiosError<ApiErrorResponse>) => {
+          console.log("error:", error);
+          loginFormRef.value?.validateField("email");
           loginFormData.password = "";
         })
         .finally(() => {
@@ -74,10 +88,10 @@ const handleLogin = () => {
           :rules="loginFormRules"
           @keyup.enter="handleLogin"
         >
-          <el-form-item prop="username">
+          <el-form-item prop="email">
             <el-input
-              v-model.trim="loginFormData.username"
-              placeholder="Username"
+              v-model.trim="loginFormData.email"
+              placeholder="Email"
               type="text"
               tabindex="1"
               :prefix-icon="User"

@@ -1,6 +1,6 @@
 <template>
   <div class="app-container center">
-    <el-empty description="Welcome to the editor role" />
+    <el-empty description="Welcome to the user role" />
   </div>
 </template>
 

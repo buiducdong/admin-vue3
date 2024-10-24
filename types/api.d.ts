@@ -4,3 +4,7 @@ interface ApiResponseData<T> {
   data: T;
   message: string;
 }
+interface ApiErrorResponse<> {
+  status: string;
+  details: string[];
+}

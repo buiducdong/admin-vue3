@@ -1,7 +1,7 @@
 import { ref, watch } from "vue";
 
 /** Project Title */
-const VM_APP_TITLE = "VI-MASH";
+const VM_APP_TITLE = process.env.VUE_APP_TITLE ?? "VI-MASH";
 
 /** Dynamic Title */
 const dynamicTitle = ref<string>("");
